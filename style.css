@@ -1,4 +1,7 @@
 
-body{margin:0;background:#111;color:white;font-family:Inter,sans-serif}
-#ui{padding:10px;position:fixed;z-index:10}
-#chat{position:fixed;right:10px;top:10px;width:280px;height:300px;overflow:auto;background:#0008;padding:10px}
+body{margin:0;background:#111;color:#fff;font-family:Inter,sans-serif;overflow:hidden}
+#hud{position:fixed;top:10px;left:10px;z-index:100}
+#chatPanel{position:fixed;right:10px;top:10px;width:300px;height:350px;background:#000a;padding:10px;border-radius:12px;z-index:100}
+#messages{height:280px;overflow:auto}
+#chatInput{width:70%}
+canvas{display:block}
