@@ -1,31 +1,145 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GitHub Kingdoms V2</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitHub Kingdoms</title>
+  <meta name="theme-color" content="#0b1020" />
+  <link rel="icon" href="data:," />
+  <style>
+    :root{
+      --bg:#07111f;--bg2:#0b1830;--card:rgba(10,18,36,.92);--line:#24314f;--text:#f6f8ff;--muted:#93a4c9;
+      --accent:#78b7ff;--accent2:#b68cff;--good:#65d18a;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;background:radial-gradient(circle at top,#16264c 0%,#081120 38%,#050a14 100%);color:var(--text);font-family:Inter,system-ui,sans-serif;overflow:hidden}
+    #app{height:100%;display:grid;grid-template-rows:auto 1fr}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(6,10,20,.72);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);position:relative;z-index:10}
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand .logo{width:40px;height:40px;border-radius:12px;background:
+      linear-gradient(135deg,#8bc5ff,#9f84ff);display:grid;place-items:center;font-weight:900;color:#081120;box-shadow:0 0 30px rgba(120,183,255,.25)}
+    .title{font-size:20px;font-weight:900}
+    .subtitle{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:10px;align-items:center}
+    button{border:none;border-radius:14px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07111f}
+    .ghost{background:#111a30;color:#dfe8ff;border:1px solid var(--line)}
+    #game-shell{position:relative;height:100%}
+    #game-container{position:absolute;inset:0}
+    #overlay-ui{position:absolute;inset:0;pointer-events:none}
+    .panel{pointer-events:auto;background:rgba(7,12,24,.88);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+    #login-screen{position:absolute;inset:0;display:grid;place-items:center;padding:20px;background:
+      radial-gradient(circle at 20% 20%,rgba(120,183,255,.16),transparent 28%),
+      radial-gradient(circle at 80% 15%,rgba(182,140,255,.14),transparent 24%),
+      linear-gradient(180deg,#07111f,#050a14)}
+    .login-card{max-width:980px;width:min(980px,100%);display:grid;grid-template-columns:1.05fr .95fr;gap:20px;padding:22px}
+    .hero{padding:20px}
+    .hero h1{margin:0 0 12px;font-size:48px;line-height:1}
+    .hero p{color:var(--muted);font-size:16px;line-height:1.65}
+    .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+    .feature{padding:14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+    .preview{min-height:420px;border-radius:20px;border:1px solid var(--line);background:
+      linear-gradient(rgba(0,0,0,.06),rgba(0,0,0,.06)),
+      linear-gradient(180deg,#1f3760 0 22%, #3d6b51 22% 58%, #6d5835 58% 68%, #233048 68% 100%);
+      position:relative;overflow:hidden}
+    .pixel{position:absolute;image-rendering:pixelated}
+    .preview .hud{position:absolute;left:16px;top:16px;padding:10px 12px;background:rgba(8,12,24,.9);border:1px solid var(--line);border-radius:14px}
+    .preview .chatdemo{position:absolute;right:16px;bottom:16px;width:260px;padding:12px}
+    .preview .chatdemo .msg{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);margin-top:8px}
+    #hud{position:absolute;left:12px;top:12px;display:flex;gap:10px;align-items:flex-start}
+    #hud .card{padding:12px 14px;min-width:220px}
+    #hud .name{font-weight:900}
+    #hud .small{font-size:12px;color:var(--muted)}
+    #chat-panel{position:absolute;right:12px;bottom:12px;width:min(420px,calc(100vw - 24px));display:flex;flex-direction:column;max-height:52vh}
+    #chat-messages{padding:12px;overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:300px}
+    .chat-msg{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05)}
+    .chat-user{font-weight:800;color:#a9c7ff}
+    #chat-compose{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+    #chat-input{flex:1;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0f1730;color:white}
+    #map-card{position:absolute;left:12px;bottom:12px;padding:12px 14px;max-width:280px}
+    #kingdom-panel{position:absolute;right:12px;top:12px;width:min(380px,calc(100vw - 24px));padding:14px;display:none}
+    .list{display:grid;gap:8px;margin-top:10px}
+    .pill{display:inline-flex;padding:6px 10px;border-radius:999px;background:#101a31;border:1px solid var(--line);font-size:12px;margin:4px 6px 0 0}
+    .hidden{display:none !important}
+    @media(max-width:980px){.login-card{grid-template-columns:1fr}.hero h1{font-size:36px}}
+  </style>
 </head>
 <body>
-<div id="hud">
-<input id="username" placeholder="GitHub username">
-<button id="joinBtn">Enter Kingdom</button>
+<div id="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">GK</div>
+      <div>
+        <div class="title">GitHub Kingdoms</div>
+        <div class="subtitle">multiplayer pixel GitHub world</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="login-btn" class="primary">Sign in with GitHub</button>
+      <button id="logout-btn" class="ghost hidden">Log out</button>
+    </div>
+  </div>
+
+  <div id="game-shell">
+    <div id="game-container"></div>
+
+    <div id="overlay-ui">
+      <div id="login-screen">
+        <div class="login-card panel">
+          <div class="hero">
+            <h1>GitHub Kingdoms</h1>
+            <p>Sign in with GitHub to spawn into a shared pixel world where every kingdom is generated from a real GitHub profile. Walk around, chat, inspect kingdoms, and explore the open-source overworld.</p>
+            <div class="feature-grid">
+              <div class="feature"><b>Realtime multiplayer</b><div class="subtitle">See other players moving around live.</div></div>
+              <div class="feature"><b>Global chat</b><div class="subtitle">Talk in-world with everyone online.</div></div>
+              <div class="feature"><b>GitHub kingdoms</b><div class="subtitle">Followers, stars, repos, and languages shape each town.</div></div>
+              <div class="feature"><b>Actual pixel RPG</b><div class="subtitle">Phaser-based top-down world with crisp pixel rendering.</div></div>
+            </div>
+          </div>
+          <div class="preview">
+            <div class="hud panel">Overworld · GitHub Archipelago</div>
+            <div class="pixel" style="left:56px;top:86px;width:80px;height:80px;background:#3f6f49;border:4px solid #2f5537"></div>
+            <div class="pixel" style="left:164px;top:98px;width:128px;height:96px;background:#7f5f37;border:4px solid #5f4526"></div>
+            <div class="pixel" style="left:130px;top:210px;width:60px;height:60px;background:#d6d6e2;border:4px solid #8f8fa3"></div>
+            <div class="pixel" style="left:290px;top:180px;width:110px;height:80px;background:#8c4f4f;border:4px solid #5e3131"></div>
+            <div class="pixel" style="left:390px;top:70px;width:120px;height:120px;background:#39609a;border:4px solid #24416a"></div>
+            <div class="chatdemo panel">
+              <b># global-chat</b>
+              <div class="msg"><span class="chat-user">@zakii360</span> anyone wanna visit my JS kingdom?</div>
+              <div class="msg"><span class="chat-user">@torvalds</span> meet at the forge district</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="hud" class="hidden">
+        <div class="panel card">
+          <div class="name" id="hud-name">Loading…</div>
+          <div class="small" id="hud-meta">kingdom</div>
+        </div>
+      </div>
+
+      <div id="kingdom-panel" class="panel"></div>
+
+      <div id="map-card" class="panel hidden">
+        <div style="font-weight:900">Controls</div>
+        <div class="small" style="margin-top:6px">WASD / Arrow keys to move<br>Enter to chat · E near a kingdom sign to inspect</div>
+      </div>
+
+      <div id="chat-panel" class="panel hidden">
+        <div style="padding:12px 12px 0;font-weight:900">Global Chat</div>
+        <div id="chat-messages"></div>
+        <div id="chat-compose">
+          <input id="chat-input" maxlength="220" placeholder="Say something…" />
+          <button id="chat-send" class="primary">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div id="chatPanel">
-<div id="messages"></div>
-<input id="chatInput" placeholder="Global chat...">
-<button id="sendBtn">Send</button>
-</div>
-
-<div id="game"></div>
-
-<script src="js/supabase.js"></script>
-<script src="js/realtime.js"></script>
-<script src="js/chat.js"></script>
-<script src="js/game.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
+<script type="module" src="./js/main.js"></script>
 </body>
 </html>

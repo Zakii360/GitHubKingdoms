@@ -1,0 +1,15 @@
+export const state = {
+  supabase: null,
+  session: null,
+  user: null,
+  githubProfile: null,
+  kingdom: null,
+  game: null,
+  worldScene: null,
+  me: null,
+  others: new Map(),
+  chatChannel: null,
+  presenceChannel: null,
+  lastPresenceSent: 0,
+  lastKnownTile: null,
+};
