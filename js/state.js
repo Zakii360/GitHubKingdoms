@@ -12,4 +12,5 @@ export const state = {
   presenceChannel: null,
   lastPresenceSent: 0,
   lastKnownTile: null,
+  chatInitialized: false,
 };
